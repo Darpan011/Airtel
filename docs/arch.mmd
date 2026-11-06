@@ -1,0 +1,83 @@
+flowchart LR
+
+subgraph CH[" CHANNELS "]
+  WEB["<b>Mobile web / PWA</b><br/>chat · quote · consent<br/>KYC · tracker"]
+  WA["WhatsApp &amp; voice<br/><i>planned</i>"]
+  PTR["Partner-assisted<br/><i>planned</i>"]
+end
+
+API["<b>API Gateway</b><br/>FastAPI<br/><i>main.py</i>"]
+
+subgraph SVC[" SERVICES "]
+  ADV["<b>Advisor</b><br/>6-question state machine<br/><i>advisor.py</i>"]
+  ENG["<b>Rules Engine</b><br/>eligibility · dependencies<br/>quantities · pricing · ETA<br/><i>engine.py</i>"]
+  KYC["<b>Smart KYC</b><br/>quality gate · deskew · OCR<br/>extract · validate<br/><i>kyc.py</i>"]
+  CON["<b>Consent Ledger</b><br/>DPDP 2023 · append-only<br/><i>consent.py</i>"]
+  ORD["<b>Orders &amp; Tracker</b><br/>milestones from install days<br/><i>orders.py</i>"]
+end
+
+subgraph EXT[" INTELLIGENCE &amp; REGISTRIES "]
+  LLM["<b>Gemini 2.0 Flash</b><br/>understands the reply<br/>writes the pitch<br/><b><i>never selects products</i></b><br/>deterministic fallback<br/><i>llm.py</i>"]
+  OCR["<b>Tesseract + OpenCV</b><br/>blur gate · deskew<br/>Laplacian 1 vs 937+"]
+  GST["<b>GSTIN lookup</b><br/>3,534 records<br/>Active / Cancelled / Suspended<br/><i>registry.py</i>"]
+  UDY["<b>Udyam lookup</b><br/>2,723 records"]
+end
+
+subgraph CORE[" SHARED CORE "]
+  VAL["Validators<br/>GSTIN mod-36 checksum<br/>masking for logs &amp; UI"]
+  PRF["BusinessProfile<br/><i>the LLM ↔ engine contract</i>"]
+  DAT["DataStore<br/>O(1) in-memory"]
+end
+
+subgraph DS[" DATA PACK "]
+  CAT[("product_catalogue<br/>25 products + rules")]
+  REG[("mock registries")]
+  LEADS[("smb_leads<br/>5,000")]
+  DOCS[("kyc_documents<br/>47 images")]
+end
+
+WEB --> API
+WA -.-> API
+PTR -.-> API
+
+API --> ADV
+API --> ENG
+API --> KYC
+API --> CON
+API --> ORD
+
+ADV -- "slots / pitch" --> LLM
+ADV -- "profile" --> ENG
+ADV -- "verify + autofill" --> GST
+KYC --> OCR
+KYC --> GST
+KYC --> UDY
+ORD --> CON
+
+ENG --> PRF
+KYC --> VAL
+GST --> VAL
+GST --> DAT
+UDY --> DAT
+ENG --> DAT
+
+DAT --> CAT
+DAT --> REG
+DAT --> LEADS
+OCR -.-> DOCS
+
+classDef chan fill:#FFF1F1,stroke:#E40000,stroke-width:1.5px,color:#15151c
+classDef gate fill:#E40000,stroke:#B80000,color:#ffffff,stroke-width:2px
+classDef svc fill:#ffffff,stroke:#c9c9d6,stroke-width:1.5px,color:#15151c
+classDef ai fill:#F3F0FF,stroke:#6E4BD8,stroke-width:1.5px,color:#15151c
+classDef gov fill:#EAF7EE,stroke:#0a7d32,stroke-width:1.5px,color:#15151c
+classDef lib fill:#FAFAFC,stroke:#c9c9d6,color:#3e3e49
+classDef data fill:#F1F1F5,stroke:#a9a9ba,color:#3e3e49
+
+class WEB,WA,PTR chan
+class API gate
+class ADV,ENG,KYC,CON,ORD svc
+class LLM,OCR ai
+class GST,UDY gov
+class VAL,PRF,DAT lib
+class CAT,LEADS,REG,DOCS data

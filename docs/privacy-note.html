@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Project Udyam Digital — Data Privacy &amp; Security Note</title>
+<style>
+  @page { size: A4; margin: 11mm 12mm; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font:400 8.1pt/1.34 "Helvetica Neue",Arial,sans-serif;color:#1c1c24}
+  h1{font-size:13pt;letter-spacing:-.01em;color:#000}
+  .sub{font-size:7.6pt;color:#5d5d6b;margin-top:1px}
+  .rule{height:2.2px;background:#E40000;margin:5px 0 6px}
+  h2{font-size:8.5pt;color:#E40000;margin:6.5px 0 2px}
+  h2 .n{color:#bcbcc6;font-weight:400;margin-right:3px}
+  p{margin-bottom:2px}
+  code{font-family:"SF Mono",Consolas,monospace;font-size:7.3pt;background:#f3f3f7;
+       padding:0 2px;border-radius:2px}
+  ul{margin:1px 0 2px 12px}
+  li{margin-bottom:1px}
+  .cols{display:flex;gap:11px}
+  .cols > div{flex:1}
+  table{width:100%;border-collapse:collapse;margin:2px 0 3px}
+  th,td{text-align:left;padding:1.8px 4px;border-bottom:.4px solid #e4e4ec;vertical-align:top}
+  th{font-size:6.9pt;text-transform:uppercase;letter-spacing:.05em;color:#6c6c7a;
+     border-bottom:.8px solid #c9c9d4}
+  .tag{display:inline-block;font-size:6.6pt;font-weight:700;padding:.3px 3.5px;border-radius:2.5px}
+  .req{background:#FFF1F1;color:#E40000}
+  .opt{background:#eef0f4;color:#5d5d6b}
+  .box{background:#FAFAFC;border-left:2.2px solid #E40000;padding:4.5px 8px;margin:5px 0}
+  .hl{background:#fff6cc}
+  .foot{margin-top:6px;padding-top:4px;border-top:.4px solid #dcdce4;
+        font-size:6.9pt;color:#6c6c7a;display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+
+<h1>Data privacy &amp; security choices</h1>
+<div class="sub">Project Udyam Digital · Airtel SYNC 2026, Enterprise Track A · Digital Personal Data Protection Act, 2023</div>
+<div class="rule"></div>
+
+<p>Every choice below is implemented in the prototype, not aspirational. References point at the code that enforces it.</p>
+
+<h2><span class="n">1</span>Data minimisation — ask for the least that works</h2>
+<p>The profile the advisor fills (<code>profile.py</code>) has <b>no field for PAN, Aadhaar, date of birth, personal address or bank details</b> — recommending a bundle needs none of them. Turnover is a band, never an exact figure, and the owner answers at most six questions. For verification, one 15-character GSTIN replaces about twenty form fields, because legal name, constitution, address and state come back from the registry. <b>Less typing and less data collected are the same change.</b></p>
+
+<h2><span class="n">2</span>Consent — specific, granular, provable, withdrawable</h2>
+<p>There is no single "I agree". Four purposes are presented separately (<code>consent.py</code>), each stating its data and retention:</p>
+<table>
+  <tr><th>Purpose</th><th>Data</th><th>Retention</th><th></th></tr>
+  <tr><td>Verify business identity</td><td>GST &amp; Udyam numbers, business name/address, signatory</td><td>Images deleted at once; fields 8 yrs (licence rule)</td><td><span class="tag req">Required</span></td></tr>
+  <tr><td>Set up and run the connection</td><td>Installation address, contact</td><td>Tenure + 8 yrs</td><td><span class="tag req">Required</span></td></tr>
+  <tr><td>Order &amp; service updates</td><td>Mobile number</td><td>Until switched off</td><td><span class="tag opt">Optional</span></td></tr>
+  <tr><td>Marketing</td><td>Mobile, email</td><td>Until switched off</td><td><span class="tag opt">Optional</span></td></tr>
+</table>
+<ul>
+  <li>Optional purposes default to <b>off</b>; refusing them changes nothing about the service. Checkout is <b>blocked</b> until the two required consents are given — enforced server-side, not just in the UI.</li>
+  <li>The <b>notice text actually shown</b> is stored with each consent and timestamped, so we can prove what was agreed to.</li>
+  <li>The ledger is <b>append-only</b>: withdrawal adds a dated record and never deletes the original. Withdrawal is one tap on the tracker — <b>as easy to withdraw as it was to give</b> (s.6(4)).</li>
+</ul>
+
+<div class="cols">
+<div>
+<h2><span class="n">3</span>Purpose limitation</h2>
+<p>The GST certificate is used for identity verification only, and is <b>never</b> fed to the recommendation engine — the rules engine receives only the structured profile. Registry services return a deliberately narrow projection of each record (<code>registry.py</code>): unneeded fields are dropped at the API boundary, not merely hidden in the UI.</p>
+</div>
+<div>
+<h2><span class="n">4</span>Storage limitation</h2>
+<p>Uploaded documents are written to a temporary directory, read, and <b>deleted the moment extraction finishes</b> — the deletion is the code path, not a retention policy someone must remember to run (<code>main.py</code>). What survives is the handful of extracted fields needed to prove the business is real.</p>
+</div>
+</div>
+
+<h2><span class="n">5</span>Masking and least exposure</h2>
+<p>Identifiers are masked wherever displayed or logged — <code>37TH*******L1ZS</code>, <code>UDYAM-PB-00-***478</code> (<code>validators.py</code>). The KYC report never carries a raw GSTIN, and <b>an automated test asserts this across all twelve applicants</b>, so a future change cannot quietly reintroduce a leak.</p>
+
+<div class="box">
+<b>An honest limitation.</b> To understand a free-text reply, the advisor sends that reply to Gemini; if the owner types their GSTIN into the chat, it travels with it. The prototype already detects GSTIN patterns locally (<code>llm.py</code>), so <span class="hl">production would redact identifiers before the call, or run an India-hosted model</span>. Documents and extracted KYC fields are <b>never</b> sent to the model — OCR and validation run entirely on our own infrastructure.
+</div>
+
+<h2><span class="n">6</span>Security controls</h2>
+<ul>
+  <li><b>In transit</b> TLS 1.3; <b>at rest</b> AES-256 for extracted identifiers. <b>Access</b> is role-based — partners see lead and status data, never identity documents — and every read of an identifier is audit-logged.</li>
+  <li><b>Integrity:</b> GSTIN checksums are verified locally before any lookup, so malformed or invented numbers never reach the registry API.</li>
+  <li><b>Fail closed:</b> an unverifiable document is referred for review, never approved on the benefit of the doubt. Blurred scans are refused <i>before</i> OCR, because OCR on a bad image produces confident nonsense.</li>
+  <li><b>No third-party sharing</b> — no data broker, no ad network, no cross-sale of customer lists.</li>
+</ul>
+
+<h2><span class="n">7</span>Rights, and what production adds</h2>
+<p>The tracker exposes access, correction, withdrawal and erasure, plus a named grievance officer and the route to the Data Protection Board. <b>Beyond the prototype:</b> DigiLocker-issued documents (consent-based fetch is more minimal than upload), Aadhaar e-sign for the agreement, India-only data residency, a registered Consent Manager, and a 72-hour breach-notification runbook.</p>
+
+<div class="foot">
+  <span>Synthetic data throughout — no real business, person or identifier appears in this prototype.</span>
+  <span>Page 1 of 1</span>
+</div>
+
+</body>
+</html>

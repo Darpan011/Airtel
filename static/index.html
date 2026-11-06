@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Udyam Digital — Accel Business</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="stage">
+
+  <!-- ─────────── the journey ─────────── -->
+  <div class="device">
+    <header class="bar">
+      <button class="back" id="back" hidden aria-label="Go back">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="mark" aria-hidden="true"><span>a</span></div>
+      <div class="bar-id">
+        <div class="bar-name">Accel Business</div>
+        <div class="bar-sub" id="status">starting up</div>
+      </div>
+      <button class="restart" id="restart" type="button">Start over</button>
+    </header>
+
+    <nav class="steps" id="steps" aria-label="Progress">
+      <span data-step="chat">Needs</span>
+      <span data-step="quote">Price</span>
+      <span data-step="consent">Permissions</span>
+      <span data-step="kyc">Verify</span>
+      <span data-step="tracker">Install</span>
+    </nav>
+
+    <main id="view-chat" class="screen chat-screen"><div id="chat"></div></main>
+    <section id="view-quote"   class="screen" hidden></section>
+    <section id="view-consent" class="screen" hidden></section>
+    <section id="view-kyc"     class="screen" hidden></section>
+    <section id="view-tracker" class="screen" hidden></section>
+
+    <div class="suggestions" id="chips"></div>
+
+    <form id="composer" autocomplete="off">
+      <input id="input" placeholder="Type your answer" aria-label="Your answer">
+      <button class="go" aria-label="Send">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
+             stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+      </button>
+    </form>
+  </div>
+
+  <!-- ─────────── what the system is doing ─────────── -->
+  <aside class="rail" aria-label="System activity">
+    <div class="rail-top">
+      <h2>System activity</h2>
+      <p>Every line below is a real operation, logged as it happens.</p>
+    </div>
+    <ol class="log" id="log"></ol>
+    <div class="rail-foot" id="railfoot"></div>
+  </aside>
+
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
