@@ -1,0 +1,13 @@
+# Never bake the Gemini key into an image.
+.env
+
+.git
+.gitignore
+.venv
+venv
+__pycache__
+**/__pycache__
+*.pyc
+.vscode
+.pytest_cache
+*.zip
